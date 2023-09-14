@@ -135,6 +135,12 @@ void main(void)		/* This really IS void, no error here. */
 	floppy_init();
 	sti();
 	move_to_user_mode();
+	setup((void *) &drive_info); // 加载文件系统
+	(void) open("/dev/tty0",O_RDWR,0); // 打开/dev/tty0 ,建立文件描述符0和dev/tty0的关联，这里对应终端控制台
+									   // 返回的句柄号0 -- stdin 标准输入设备
+	(void) dup(0);	// 复制句柄，产生句柄1号，-- stdout 标准输出设备
+	(void) dup(0);	// 复制句柄，产生句柄2号，-- stderr 标准出错输出设备
+	(void) open("/var/process.log",O_CREAT|O_TRUNC|O_WRONLY,0666);
 	if (!fork()) {		/* we count on this going ok */
 		init();
 	}
@@ -169,10 +175,11 @@ void init(void)
 {
 	int pid,i;
 
-	setup((void *) &drive_info);
-	(void) open("/dev/tty0",O_RDWR,0);
-	(void) dup(0);
-	(void) dup(0);
+	setup((void *) &drive_info); // 加载文件系统
+	(void) open("/dev/tty0",O_RDWR,0); // 打开/dev/tty0 ,建立文件描述符0和dev/tty0的关联，这里对应终端控制台
+									   // 返回的句柄号0 -- stdin 标准输入设备
+	(void) dup(0);	// 复制句柄，产生句柄1号，-- stdout 标准输出设备
+	(void) dup(0);	// 复制句柄，产生句柄2号，-- stderr 标准出错输出设备
 	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
 		NR_BUFFERS*BLOCK_SIZE);
 	printf("Free mem: %d bytes\n\r",memory_end-main_memory_start);
